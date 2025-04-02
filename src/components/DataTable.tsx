@@ -7,8 +7,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Entry } from "@/types/entry";
-import { useState, useEffect } from "react";
-import { X, Edit, Trash2, RefreshCcw, ArrowLeft, Save, Check, AlertCircle, Info, Copy, Calendar } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, Edit, Trash2, RefreshCcw, ArrowLeft, Save, Check, AlertCircle, Info, Copy, Calendar, Download } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "./ui/input";
@@ -17,6 +17,7 @@ import { deleteEntry, updateEntry } from "@/services/tableService";
 import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
+import html2canvas from "html2canvas";
 
 interface SortConfig {
   key: keyof Entry | 'createdAt';
@@ -39,6 +40,8 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const detailsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log("DataTable received entries:", initialEntries.length);
@@ -127,6 +130,47 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
     return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-400';
   };
 
+  const handleDownloadImage = async () => {
+    if (detailsRef.current) {
+      setIsDownloading(true);
+      try {
+        const clone = detailsRef.current.cloneNode(true) as HTMLElement;
+        
+        clone.style.backgroundColor = 'white';
+        clone.style.padding = '20px';
+        clone.style.borderRadius = '8px';
+        clone.style.width = `${detailsRef.current.offsetWidth}px`;
+        
+        clone.style.position = 'absolute';
+        clone.style.top = '-9999px';
+        document.body.appendChild(clone);
+        
+        const canvas = await html2canvas(clone, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          useCORS: true,
+        });
+        
+        document.body.removeChild(clone);
+        
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        const entryId = expandedRow || 'entry';
+        a.download = `entry-${entryId}-details.png`;
+        a.href = dataUrl;
+        a.click();
+        
+        toast.success("Image downloaded successfully");
+      } catch (error) {
+        console.error('Error generating image:', error);
+        toast.error("Failed to download image");
+      } finally {
+        setIsDownloading(false);
+      }
+    }
+  };
+
   if (expandedRow) {
     const entry = entries.find(e => e.id === expandedRow);
     if (!entry) return null;
@@ -152,6 +196,16 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
           <div className="flex gap-2">
             {!editMode ? (
               <>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={handleDownloadImage}
+                  className="hover:bg-muted"
+                  disabled={isDownloading}
+                  title="Download as Image"
+                >
+                  <Download className={`h-4 w-4 ${isDownloading ? 'animate-pulse' : ''}`} />
+                </Button>
                 <Button 
                   variant="outline" 
                   size="icon"
@@ -184,7 +238,7 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
           </div>
         </div>
         
-        <div className="px-2 sm:px-4 pb-safe">
+        <div className="px-2 sm:px-4 pb-safe" ref={detailsRef}>
           <div className="bg-card rounded-lg border shadow-sm overflow-hidden mb-4">
             <div className="p-4 border-b bg-muted/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
