@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import html2canvas from "html2canvas";
+import { getStatusStyleForImage } from "@/lib/image-utils";
 
 interface SortConfig {
   key: keyof Entry | 'createdAt';
@@ -131,33 +132,134 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
   };
 
   const handleDownloadImage = async () => {
-    if (detailsRef.current) {
+    if (expandedRow) {
       setIsDownloading(true);
       try {
-        const clone = detailsRef.current.cloneNode(true) as HTMLElement;
+        const entry = entries.find(e => e.id === expandedRow);
+        if (!entry) {
+          toast.error("Entry not found");
+          return;
+        }
         
-        clone.style.backgroundColor = 'white';
-        clone.style.padding = '20px';
-        clone.style.borderRadius = '8px';
-        clone.style.width = `${detailsRef.current.offsetWidth}px`;
+        const container = document.createElement('div');
         
-        clone.style.position = 'absolute';
-        clone.style.top = '-9999px';
-        document.body.appendChild(clone);
+        container.style.backgroundColor = 'white';
+        container.style.padding = '40px';
+        container.style.borderRadius = '8px';
+        container.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+        container.style.width = '800px';
+        container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
         
-        const canvas = await html2canvas(clone, {
+        const heading = document.createElement('div');
+        heading.style.display = 'flex';
+        heading.style.justifyContent = 'space-between';
+        heading.style.alignItems = 'center';
+        heading.style.marginBottom = '24px';
+        heading.style.paddingBottom = '16px';
+        heading.style.borderBottom = '1px solid #e5e7eb';
+        
+        const title = document.createElement('h2');
+        title.textContent = 'Entry Details';
+        title.style.fontSize = '24px';
+        title.style.fontWeight = '600';
+        title.style.margin = '0';
+        title.style.color = '#111827';
+        
+        const statusBadge = document.createElement('div');
+        const statusStyle = getStatusStyleForImage(entry.status);
+        
+        statusBadge.textContent = entry.status;
+        statusBadge.style.padding = '6px 12px';
+        statusBadge.style.borderRadius = '9999px';
+        statusBadge.style.backgroundColor = statusStyle.backgroundColor;
+        statusBadge.style.color = statusStyle.textColor;
+        statusBadge.style.fontWeight = '600';
+        statusBadge.style.fontSize = '16px';
+        
+        heading.appendChild(title);
+        heading.appendChild(statusBadge);
+        container.appendChild(heading);
+        
+        const dateInfo = document.createElement('div');
+        dateInfo.style.display = 'flex';
+        dateInfo.style.alignItems = 'center';
+        dateInfo.style.marginBottom = '24px';
+        dateInfo.style.color = '#4b5563';
+        dateInfo.style.fontSize = '14px';
+        
+        const dateText = document.createElement('span');
+        dateText.textContent = `Date: ${entry.date}`;
+        
+        dateInfo.appendChild(dateText);
+        container.appendChild(dateInfo);
+        
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        
+        const fieldsToInclude = [
+          { key: 'passNumber', label: 'Pass Number' },
+          { key: 'cusdecNo', label: 'Cusdec No' },
+          { key: 'containerNo', label: 'Container No' },
+          { key: 'destination', label: 'Destination' },
+          { key: 'truckNumber', label: 'Truck Number' },
+          { key: 'tokenNumber', label: 'Token Number' },
+          { key: 'item', label: 'Item' },
+          { key: 'name', label: 'Name' },
+          { key: 'feet', label: 'Feet' },
+        ];
+        
+        fieldsToInclude.forEach((field, index) => {
+          if (entry[field.key as keyof Entry]) {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #e5e7eb';
+            row.style.backgroundColor = index % 2 === 0 ? '#f9fafb' : 'white';
+            
+            const labelCell = document.createElement('td');
+            labelCell.textContent = field.label;
+            labelCell.style.padding = '12px 16px';
+            labelCell.style.fontWeight = '500';
+            labelCell.style.width = '180px';
+            labelCell.style.color = '#4b5563';
+            
+            const valueCell = document.createElement('td');
+            valueCell.textContent = String(entry[field.key as keyof Entry]);
+            valueCell.style.padding = '12px 16px';
+            valueCell.style.color = '#111827';
+            
+            row.appendChild(labelCell);
+            row.appendChild(valueCell);
+            table.appendChild(row);
+          }
+        });
+        
+        container.appendChild(table);
+        
+        const footer = document.createElement('div');
+        footer.style.marginTop = '24px';
+        footer.style.textAlign = 'center';
+        footer.style.color = '#6b7280';
+        footer.style.fontSize = '12px';
+        footer.textContent = `Generated on ${new Date().toLocaleString()}`;
+        container.appendChild(footer);
+        
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '-9999px';
+        document.body.appendChild(container);
+        
+        const canvas = await html2canvas(container, {
           scale: 2,
           backgroundColor: '#ffffff',
           logging: false,
           useCORS: true,
         });
         
-        document.body.removeChild(clone);
+        document.body.removeChild(container);
         
         const dataUrl = canvas.toDataURL('image/png');
         const a = document.createElement('a');
-        const entryId = expandedRow || 'entry';
-        a.download = `entry-${entryId}-details.png`;
+        a.download = `entry-details-${entry.passNumber || expandedRow}.png`;
         a.href = dataUrl;
         a.click();
         
