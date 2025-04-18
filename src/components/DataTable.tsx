@@ -18,7 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import html2canvas from "html2canvas";
-import { getStatusStyleForImage } from "@/lib/image-utils";
+import { getStatusStyleForImage, getMobileImageStyles } from "@/lib/image-utils";
 
 interface SortConfig {
   key: keyof Entry | 'createdAt';
@@ -142,62 +142,34 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
         }
         
         const container = document.createElement('div');
-        
-        container.style.backgroundColor = 'white';
-        container.style.padding = '40px';
-        container.style.borderRadius = '8px';
-        container.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-        container.style.width = '800px';
-        container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        const styles = getMobileImageStyles();
+        Object.assign(container.style, styles.containerStyle);
         
         const heading = document.createElement('div');
-        heading.style.display = 'flex';
-        heading.style.justifyContent = 'space-between';
-        heading.style.alignItems = 'center';
-        heading.style.marginBottom = '24px';
-        heading.style.paddingBottom = '16px';
-        heading.style.borderBottom = '1px solid #e5e7eb';
+        Object.assign(heading.style, styles.headerStyle);
         
         const title = document.createElement('h2');
         title.textContent = 'Entry Details';
-        title.style.fontSize = '24px';
-        title.style.fontWeight = '600';
-        title.style.margin = '0';
-        title.style.color = '#111827';
+        Object.assign(title.style, styles.titleStyle);
         
         const statusBadge = document.createElement('div');
         const statusStyle = getStatusStyleForImage(entry.status);
-        
         statusBadge.textContent = entry.status;
-        statusBadge.style.padding = '6px 12px';
-        statusBadge.style.borderRadius = '9999px';
-        statusBadge.style.backgroundColor = statusStyle.backgroundColor;
-        statusBadge.style.color = statusStyle.textColor;
-        statusBadge.style.fontWeight = '600';
-        statusBadge.style.fontSize = '16px';
+        Object.assign(statusBadge.style, {
+          ...styles.statusStyle,
+          backgroundColor: statusStyle.backgroundColor,
+          color: statusStyle.textColor,
+        });
         
         heading.appendChild(title);
         heading.appendChild(statusBadge);
         container.appendChild(heading);
         
-        const dateInfo = document.createElement('div');
-        dateInfo.style.display = 'flex';
-        dateInfo.style.alignItems = 'center';
-        dateInfo.style.marginBottom = '24px';
-        dateInfo.style.color = '#4b5563';
-        dateInfo.style.fontSize = '14px';
-        
-        const dateText = document.createElement('span');
-        dateText.textContent = `Date: ${entry.date}`;
-        
-        dateInfo.appendChild(dateText);
-        container.appendChild(dateInfo);
-        
         const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
+        Object.assign(table.style, styles.tableStyle);
         
         const fieldsToInclude = [
+          { key: 'date', label: 'Date' },
           { key: 'passNumber', label: 'Pass Number' },
           { key: 'cusdecNo', label: 'Cusdec No' },
           { key: 'containerNo', label: 'Container No' },
@@ -206,26 +178,21 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
           { key: 'tokenNumber', label: 'Token Number' },
           { key: 'item', label: 'Item' },
           { key: 'name', label: 'Name' },
-          { key: 'feet', label: 'Feet' },
+          { key: 'feet', label: 'Feet' }
         ];
         
-        fieldsToInclude.forEach((field, index) => {
+        fieldsToInclude.forEach((field) => {
           if (entry[field.key as keyof Entry]) {
             const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid #e5e7eb';
-            row.style.backgroundColor = index % 2 === 0 ? '#f9fafb' : 'white';
+            row.style.marginBottom = '4px';
             
             const labelCell = document.createElement('td');
             labelCell.textContent = field.label;
-            labelCell.style.padding = '12px 16px';
-            labelCell.style.fontWeight = '500';
-            labelCell.style.width = '180px';
-            labelCell.style.color = '#4b5563';
+            Object.assign(labelCell.style, styles.labelCellStyle);
             
             const valueCell = document.createElement('td');
             valueCell.textContent = String(entry[field.key as keyof Entry]);
-            valueCell.style.padding = '12px 16px';
-            valueCell.style.color = '#111827';
+            Object.assign(valueCell.style, styles.valueCellStyle);
             
             row.appendChild(labelCell);
             row.appendChild(valueCell);
@@ -236,23 +203,20 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
         container.appendChild(table);
         
         const footer = document.createElement('div');
-        footer.style.marginTop = '24px';
-        footer.style.textAlign = 'center';
-        footer.style.color = '#6b7280';
-        footer.style.fontSize = '12px';
-        footer.textContent = `Generated on ${new Date().toLocaleString()}`;
+        Object.assign(footer.style, styles.footerStyle);
+        footer.textContent = `Generated on ${new Date().toLocaleDateString()}`;
         container.appendChild(footer);
         
         container.style.position = 'absolute';
         container.style.left = '-9999px';
-        container.style.top = '-9999px';
         document.body.appendChild(container);
         
         const canvas = await html2canvas(container, {
-          scale: 2,
+          scale: 3,
           backgroundColor: '#ffffff',
           logging: false,
           useCORS: true,
+          windowWidth: 600,
         });
         
         document.body.removeChild(container);
