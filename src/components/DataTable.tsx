@@ -154,7 +154,7 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
         
         const statusBadge = document.createElement('div');
         const statusStyle = getStatusStyleForImage(entry.status);
-        statusBadge.textContent = entry.status;
+        statusBadge.textContent = entry.status.toUpperCase();
         Object.assign(statusBadge.style, {
           ...styles.statusStyle,
           backgroundColor: statusStyle.backgroundColor,
@@ -184,7 +184,7 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
         fieldsToInclude.forEach((field) => {
           if (entry[field.key as keyof Entry]) {
             const row = document.createElement('tr');
-            row.style.marginBottom = '4px';
+            row.style.marginBottom = '8px';
             
             const labelCell = document.createElement('td');
             labelCell.textContent = field.label;
@@ -212,11 +212,12 @@ const DataTable = ({ entries: initialEntries, isFlipped, lastUpdatedId }: DataTa
         document.body.appendChild(container);
         
         const canvas = await html2canvas(container, {
-          scale: 3,
+          scale: 4,
           backgroundColor: '#ffffff',
           logging: false,
           useCORS: true,
-          windowWidth: 600,
+          width: 480,
+          height: 853,
         });
         
         document.body.removeChild(container);

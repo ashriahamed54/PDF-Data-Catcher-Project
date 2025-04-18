@@ -17,9 +17,9 @@ export const prepareEntryForImage = (entry: Entry): Record<string, string> => {
 export const getStatusStyleForImage = (status: string): { backgroundColor: string, textColor: string } => {
   status = status.toLowerCase();
   if (status === 'in') {
-    return { backgroundColor: '#F2FCE2', textColor: '#166534' };
+    return { backgroundColor: '#E5DEFF', textColor: '#6E59A5' };
   } else if (status === 'out') {
-    return { backgroundColor: '#FEE2E2', textColor: '#B91C1C' };
+    return { backgroundColor: '#FFDEE2', textColor: '#B91C1C' };
   }
   return { backgroundColor: '#F3F4F6', textColor: '#1F2937' };
 };
@@ -30,60 +30,69 @@ export const getStatusStyleForImage = (status: string): { backgroundColor: strin
 export const getMobileImageStyles = () => ({
   containerStyle: {
     backgroundColor: '#FFFFFF',
-    padding: '24px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    width: '100%',
-    maxWidth: '600px',
+    padding: '32px 24px',
+    width: '480px', // Fixed width for 9:16 aspect ratio
+    height: '853px', // 9:16 aspect ratio based on width
     margin: '0 auto',
     fontFamily: '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+    boxSizing: 'border-box',
   },
   headerStyle: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '20px',
-    paddingBottom: '12px',
+    marginBottom: '8px',
+    paddingBottom: '16px',
     borderBottom: '2px solid #F3F4F6',
   },
   titleStyle: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: '28px',
+    fontWeight: '700',
+    color: '#1A1F2C',
     margin: '0',
   },
   statusStyle: {
-    padding: '8px 16px',
-    borderRadius: '9999px',
-    fontWeight: '600',
-    fontSize: '16px',
+    padding: '12px 24px',
+    borderRadius: '999px',
+    fontWeight: '700',
+    fontSize: '20px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
   },
   tableStyle: {
     width: '100%',
     borderCollapse: 'separate',
-    borderSpacing: '0 4px',
+    borderSpacing: '0 8px',
   },
   labelCellStyle: {
-    padding: '12px 16px',
-    fontWeight: '500',
+    padding: '16px',
+    fontWeight: '600',
     width: '140px',
-    color: '#4B5563',
+    color: '#6B7280',
     backgroundColor: '#F9FAFB',
-    borderRadius: '6px 0 0 6px',
-    fontSize: '14px',
+    borderRadius: '12px 0 0 12px',
+    fontSize: '16px',
+    letterSpacing: '0.025em',
   },
   valueCellStyle: {
-    padding: '12px 16px',
+    padding: '16px',
     color: '#111827',
     backgroundColor: '#F9FAFB',
-    borderRadius: '0 6px 6px 0',
-    fontSize: '14px',
-    fontWeight: '500',
+    borderRadius: '0 12px 12px 0',
+    fontSize: '16px',
+    fontWeight: '600',
+    letterSpacing: '0.025em',
   },
   footerStyle: {
-    marginTop: '20px',
+    marginTop: 'auto',
     textAlign: 'center',
-    color: '#6B7280',
-    fontSize: '12px',
+    color: '#9CA3AF',
+    fontSize: '14px',
+    paddingTop: '24px',
+    borderTop: '1px solid #F3F4F6',
   }
 });
+
