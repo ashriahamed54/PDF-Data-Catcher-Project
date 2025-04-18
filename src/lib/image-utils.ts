@@ -1,4 +1,3 @@
-
 import { formatEntryForDisplay } from "./utils";
 import { Entry } from "@/types/entry";
 
@@ -61,6 +60,9 @@ export const getMobileImageStyles = () => ({
     fontSize: '20px',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tableStyle: {
     width: '100%',
@@ -95,4 +97,3 @@ export const getMobileImageStyles = () => ({
     borderTop: '1px solid #F3F4F6',
   }
 });
-
