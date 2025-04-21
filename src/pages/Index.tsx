@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import { saveEntry, getRecentEntries } from '@/services/tableService';
 import { useQuery } from '@tanstack/react-query';
 import html2canvas from "html2canvas";
 import { getMobileImageStyles, getStatusStyleForImage } from "@/lib/image-utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Index = () => {
   const [pdfData, setPdfData] = useState<Omit<Entry, 'id'> | undefined>();
@@ -134,17 +134,109 @@ const Index = () => {
       for (const dest of selectedTables) {
         const entriesList = entriesByDestination[dest] || [];
         const container = document.createElement("div");
-        const styles = getMobileImageStyles();
+
+        const styles = {
+          containerStyle: {
+            backgroundColor: "#fff",
+            padding: "32px 32px 36px 32px",
+            width: "1200px",
+            minHeight: "550px",
+            margin: "0 auto",
+            fontFamily: 'Inter, system-ui, sans-serif',
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
+            boxSizing: "border-box",
+            borderRadius: "18px",
+            boxShadow: "0 0 24px 2px #ece6f6",
+            position: "relative"
+          },
+          headerStyle: {
+            display: "flex",
+            alignItems: "center",
+            borderBottom: "2px solid #ece6f6",
+            paddingBottom: "16px",
+            marginBottom: "4px",
+            gap: "16px"
+          },
+          titleStyle: {
+            fontSize: "2rem",
+            fontWeight: "700",
+            color: "#1A1F2C",
+            margin: "0 12px 0 0",
+            letterSpacing: ".02em"
+          },
+          tableStyle: {
+            width: "100%",
+            borderCollapse: "collapse",
+            backgroundColor: "#fff",
+            fontWeight: 500,
+            fontSize: "15px",
+            color: "#000",
+          },
+          thStyle: {
+            padding: "16px 8px",
+            background: "#F1F0FB",
+            fontWeight: "700",
+            fontSize: "16px",
+            color: "#6E59A5",
+            borderRadius: "8px 8px 0 0",
+            letterSpacing: "0.04em",
+            textAlign: "center",
+            border: "1px solid #edeaf8"
+          },
+          tdStyle: {
+            padding: "14px 8px",
+            color: "#1A1F2C",
+            fontSize: "15px",
+            background: "#fff",
+            border: "1px solid #edeaf8",
+            fontWeight: "500",
+            textAlign: "center",
+            verticalAlign: "middle",
+            maxWidth: "220px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          },
+          statusBadge: {
+            padding: "0 24px",
+            borderRadius: "999px",
+            fontWeight: "700",
+            fontSize: "16px",
+            textTransform: "uppercase",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: "41px",
+            minWidth: "66px",
+            height: "41px",
+            margin: "0 auto"
+          }
+        };
+
         Object.assign(container.style, styles.containerStyle);
 
         const heading = document.createElement("div");
         Object.assign(heading.style, styles.headerStyle);
 
+        const svgIcon = document.createElement("span");
+        svgIcon.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" stroke="#6E59A5" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="13" rx="2"/><path d="M6 7V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3"/>
+          </svg>
+        `;
+        svgIcon.style.display = "inline-flex";
+        svgIcon.style.alignItems = "center";
+        heading.appendChild(svgIcon);
+
         const title = document.createElement("h2");
         title.textContent = dest;
         Object.assign(title.style, styles.titleStyle);
-
         heading.appendChild(title);
+
+        heading.appendChild(document.createElement("div"));
+
         container.appendChild(heading);
 
         const table = document.createElement("table");
@@ -161,13 +253,7 @@ const Index = () => {
         allFields.forEach((key) => {
           const th = document.createElement("th");
           th.textContent = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
-          th.style.padding = "14px 8px";
-          th.style.background = "#F1F0FB";
-          th.style.fontWeight = "700";
-          th.style.fontSize = "15px";
-          th.style.color = "#6E59A5";
-          th.style.borderRadius = "10px 10px 0 0";
-          th.style.letterSpacing = "0.04em";
+          Object.assign(th.style, styles.thStyle);
           headerRow.appendChild(th);
         });
         table.appendChild(headerRow);
@@ -182,46 +268,29 @@ const Index = () => {
               const statusStyle = getStatusStyleForImage(String(value));
               badge.textContent = String(value).toUpperCase();
               Object.assign(badge.style, {
-                ...styles.statusStyle,
-                backgroundColor: statusStyle.backgroundColor,
-                color: statusStyle.textColor,
-                minWidth: "66px",
-                height: "41px",
-                padding: "0 24px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "999px",
-                fontWeight: "700",
-                fontSize: "16px",
-                letterSpacing: ".06em",
-                margin: "0 auto",
-                textAlign: "center",
+                ...styles.statusBadge,
+                background: statusStyle.backgroundColor,
+                color: statusStyle.textColor
               });
               cell.appendChild(badge);
             } else {
               cell.textContent = typeof value === "string" ? value : JSON.stringify(value);
             }
-            Object.assign(cell.style, {
-              padding: "12px 8px",
-              color: "#1A1F2C",
-              fontSize: "15px",
-              background: "#fff",
-              borderBottom: "1px solid #edeaf8",
-              fontWeight: "500",
-              textAlign: "center",
-              verticalAlign: "middle",
-              maxWidth: "110px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            });
+            Object.assign(cell.style, styles.tdStyle);
             row.appendChild(cell);
           });
           table.appendChild(row);
         });
 
         container.appendChild(table);
+
+        const footer = document.createElement("div");
+        footer.textContent = `Exported: ${new Date().toLocaleString()}`;
+        footer.style.marginTop = "24px";
+        footer.style.textAlign = "right";
+        footer.style.fontSize = "13px";
+        footer.style.color = "#8E9196";
+        container.appendChild(footer);
 
         container.style.position = "absolute";
         container.style.left = "-9999px";
@@ -230,10 +299,10 @@ const Index = () => {
         document.body.appendChild(container);
 
         const canvas = await html2canvas(container, {
-          scale: 4,
-          width: 480,
-          height: 853,
-          backgroundColor: "#ffffff",
+          scale: 2,
+          width: 1200,
+          height: container.offsetHeight,
+          backgroundColor: "#fff",
           useCORS: true,
           logging: false,
         });
@@ -241,12 +310,11 @@ const Index = () => {
 
         const dataUrl = canvas.toDataURL("image/png");
         const a = document.createElement("a");
-        // Fix: Correct the string template with proper quote termination
-        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png";
         a.href = dataUrl;
         a.click();
       }
-      toast.success("Tables downloaded as high-quality images!", {
+      toast.success("Tables downloaded as professional images!", {
         position: "top-center",
       });
     } catch (e) {
@@ -360,23 +428,22 @@ const Index = () => {
                       </div>
                     )}
                     {Object.entries(entriesByDestination).map(([dest, entries]) => (
-                      <label
+                      <div
                         key={dest}
-                        className={
-                          "flex items-center justify-between bg-muted/20 px-4 py-3 rounded-lg cursor-pointer border hover:bg-muted/30 transition-colors shadow-sm mb-1"
-                        }
+                        className="flex items-center gap-3 bg-muted/20 px-4 py-3 rounded-lg border hover:bg-muted/30 transition-colors shadow-sm mb-1"
                       >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedTables.includes(dest)}
-                            onChange={() => toggleTable(dest)}
-                            className="accent-primary h-5 w-5 rounded border border-muted-foreground focus:ring-2 focus:ring-primary mr-2 transition-all duration-150"
-                          />
+                        <Checkbox
+                          checked={selectedTables.includes(dest)}
+                          onCheckedChange={() => toggleTable(dest)}
+                          className="mr-3 h-6 w-6 rounded border-primary data-[state=checked]:bg-primary/90 flex-shrink-0"
+                          aria-label={`Select ${dest}`}
+                        />
+                        <div className="flex items-center gap-2 w-full">
+                          <TableIcon className="w-5 h-5 text-primary/80 flex-shrink-0" />
                           <span className="font-medium text-base">{dest}</span>
                           <span className="ml-2 bg-secondary/70 text-xs rounded-full px-2 py-0.5">{entries.length} entries</span>
                         </div>
-                      </label>
+                      </div>
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
