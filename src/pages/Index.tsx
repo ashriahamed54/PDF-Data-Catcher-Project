@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import html2canvas from "html2canvas";
 import { getMobileImageStyles, getStatusStyleForImage } from "@/lib/image-utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Database } from '@/components/ui/database';
 
 const Index = () => {
   const [pdfData, setPdfData] = useState<Omit<Entry, 'id'> | undefined>();
@@ -313,7 +313,7 @@ const Index = () => {
 
         const dataUrl = canvas.toDataURL("image/png");
         const a = document.createElement("a");
-        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png";
         a.href = dataUrl;
         a.click();
       }
@@ -480,29 +480,35 @@ const Index = () => {
                         No destination tables to display.
                       </div>
                     )}
-                    {Object.entries(entriesByDestination).map(([dest, entries]) => (
-                      <div
-                        key={dest}
-                        className={
-                          "flex items-center gap-3 bg-muted/20 px-4 py-3 rounded-lg border hover:bg-muted/30 transition-colors shadow-sm mb-1 group relative"
-                        }
-                        onContextMenu={e => handleDestinationRowContextMenu(dest, e)}
-                        onTouchStart={() => handleDestinationRowTouchStart(dest)}
-                        onTouchEnd={handleDestinationRowTouchEnd}
-                      >
-                        {selectionMode && (
-                          <input
-                            type="checkbox"
-                            checked={selectedTables.includes(dest)}
-                            onChange={() => toggleTable(dest)}
-                            className="accent-primary h-5 w-5 rounded border border-primary focus:ring-2 focus:ring-primary mr-3 transition-all duration-150"
-                            style={{
-                              marginLeft: 0,
-                            }}
-                          />
-                        )}
+                    {Object.entries(entriesByDestination).map(([dest, entries]) => {
+                      const isSelected = selectionMode && selectedTables.includes(dest);
+                      return (
                         <div
-                          className="flex items-center gap-2 w-full cursor-pointer"
+                          key={dest}
+                          className={
+                            `flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors shadow-sm mb-1 group relative cursor-pointer 
+                            ${isSelected ? 'border-primary bg-primary/10' : 'bg-muted/20 hover:bg-muted/30'}`
+                          }
+                          onContextMenu={e => {
+                            e.preventDefault();
+                            if (!selectionMode) {
+                              setSelectionMode(true);
+                              setSelectedTables([dest]);
+                            } else {
+                              toggleTable(dest);
+                            }
+                          }}
+                          onTouchStart={() => {
+                            if (longPressTimer) clearTimeout(longPressTimer);
+                            const timer = setTimeout(() => {
+                              setSelectionMode(true);
+                              setSelectedTables([dest]);
+                            }, 600);
+                            setLongPressTimer(timer);
+                          }}
+                          onTouchEnd={() => {
+                            if (longPressTimer) clearTimeout(longPressTimer);
+                          }}
                           onClick={() => {
                             if (selectionMode) {
                               toggleTable(dest);
@@ -512,22 +518,22 @@ const Index = () => {
                           }}
                           style={{ userSelect: "none" }}
                         >
-                          <TableIcon className="w-5 h-5 text-primary/80 flex-shrink-0" />
+                          <Database className="w-5 h-5 text-primary/80 flex-shrink-0" />
                           <span className="font-medium text-base">{dest}</span>
                           <span className="ml-2 bg-secondary/70 text-xs rounded-full px-2 py-0.5">{entries.length} entries</span>
+                          <ChevronLeft className="ml-auto w-4 h-4 rotate-180 flex-shrink-0" />
+                          {isSelected && (
+                            <span className="absolute left-[-18px] top-1/2 -translate-y-1/2 rounded-full border-2 border-primary w-3.5 h-3.5 bg-primary"></span>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   {!selectionMode && (
                     <span className="text-xs text-muted-foreground ml-2">
-                      Long-press (mobile) or right-click (desktop) a table to enable multi-select & download
+                      Long-press (mobile) or right-click (desktop) on a table row to select & download tables
                     </span>
                   )}
-                  <DestinationList
-                    destinations={entriesByDestination}
-                    onSelect={setSelectedDestination}
-                  />
                 </div>
               )}
             </div>
