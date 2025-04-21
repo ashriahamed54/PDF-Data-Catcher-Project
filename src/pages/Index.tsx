@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +27,8 @@ const Index = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
   const [isDownloadTablesLoading, setIsDownloadTablesLoading] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -311,7 +312,7 @@ const Index = () => {
 
         const dataUrl = canvas.toDataURL("image/png");
         const a = document.createElement("a");
-        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png";
         a.href = dataUrl;
         a.click();
       }
@@ -324,6 +325,34 @@ const Index = () => {
     } finally {
       setIsDownloadTablesLoading(false);
     }
+  };
+
+  const handleDestinationRowContextMenu = (dest: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!selectionMode) {
+      setSelectionMode(true);
+      setSelectedTables([dest]);
+    } else {
+      toggleTable(dest);
+    }
+  };
+
+  const handleDestinationRowTouchStart = (dest: string) => {
+    if (longPressTimer) clearTimeout(longPressTimer);
+    const timer = setTimeout(() => {
+      setSelectionMode(true);
+      setSelectedTables([dest]);
+    }, 600);
+    setLongPressTimer(timer);
+  };
+
+  const handleDestinationRowTouchEnd = () => {
+    if (longPressTimer) clearTimeout(longPressTimer);
+  };
+
+  const resetSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedTables([]);
   };
 
   const entriesByDestination = (entries || []).reduce((acc, entry) => {
@@ -422,6 +451,28 @@ const Index = () => {
                   <SheetHeader className="flex items-center justify-between">
                     <SheetTitle className="text-center w-full text-xl font-semibold">Container Data Tables</SheetTitle>
                   </SheetHeader>
+                  {selectionMode && (
+                    <div className="flex items-center gap-2 mb-4 animate-fade-in">
+                      <Button
+                        onClick={handleDownloadSelectedTables}
+                        disabled={isDownloadTablesLoading || selectedTables.length === 0}
+                        className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-semibold text-base"
+                        size="lg"
+                      >
+                        <Download className="w-5 h-5" />
+                        {isDownloadTablesLoading ? "Downloading..." : "Download Tables"}
+                      </Button>
+                      <Button
+                        onClick={resetSelectionMode}
+                        variant="ghost"
+                        className="ml-2"
+                        size="sm"
+                      >Cancel</Button>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {selectedTables.length} selected
+                      </span>
+                    </div>
+                  )}
                   <div className="flex flex-col gap-2 mt-4 mb-6">
                     {Object.keys(entriesByDestination).length === 0 && (
                       <div className="text-muted-foreground text-center p-6">
@@ -431,15 +482,35 @@ const Index = () => {
                     {Object.entries(entriesByDestination).map(([dest, entries]) => (
                       <div
                         key={dest}
-                        className="flex items-center gap-3 bg-muted/20 px-4 py-3 rounded-lg border hover:bg-muted/30 transition-colors shadow-sm mb-1"
+                        className={
+                          "flex items-center gap-3 bg-muted/20 px-4 py-3 rounded-lg border hover:bg-muted/30 transition-colors shadow-sm mb-1 group relative"
+                        }
+                        onContextMenu={e => handleDestinationRowContextMenu(dest, e)}
+                        onTouchStart={() => handleDestinationRowTouchStart(dest)}
+                        onTouchEnd={handleDestinationRowTouchEnd}
                       >
-                        <Checkbox
-                          checked={selectedTables.includes(dest)}
-                          onCheckedChange={() => toggleTable(dest)}
-                          className="mr-3 h-6 w-6 rounded border-primary data-[state=checked]:bg-primary/90 flex-shrink-0"
-                          aria-label={`Select ${dest}`}
-                        />
-                        <div className="flex items-center gap-2 w-full">
+                        {selectionMode && (
+                          <input
+                            type="checkbox"
+                            checked={selectedTables.includes(dest)}
+                            onChange={() => toggleTable(dest)}
+                            className="accent-primary h-5 w-5 rounded border border-primary focus:ring-2 focus:ring-primary mr-3 transition-all duration-150"
+                            style={{
+                              marginLeft: 0,
+                            }}
+                          />
+                        )}
+                        <div
+                          className="flex items-center gap-2 w-full cursor-pointer"
+                          onClick={() => {
+                            if (selectionMode) {
+                              toggleTable(dest);
+                            } else {
+                              setSelectedDestination(dest);
+                            }
+                          }}
+                          style={{ userSelect: "none" }}
+                        >
                           <TableIcon className="w-5 h-5 text-primary/80 flex-shrink-0" />
                           <span className="font-medium text-base">{dest}</span>
                           <span className="ml-2 bg-secondary/70 text-xs rounded-full px-2 py-0.5">{entries.length} entries</span>
@@ -447,20 +518,11 @@ const Index = () => {
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={handleDownloadSelectedTables}
-                      disabled={isDownloadTablesLoading || selectedTables.length === 0}
-                      className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-semibold text-base"
-                      size="lg"
-                    >
-                      <Download className="w-5 h-5" />
-                      {isDownloadTablesLoading ? "Downloading..." : "Download Tables"}
-                    </Button>
+                  {!selectionMode && (
                     <span className="text-xs text-muted-foreground ml-2">
-                      Checked tables will download as print-optimized images
+                      Long-press (mobile) or right-click (desktop) a table to enable multi-select & download
                     </span>
-                  </div>
+                  )}
                   <DestinationList
                     destinations={entriesByDestination}
                     onSelect={setSelectedDestination}
