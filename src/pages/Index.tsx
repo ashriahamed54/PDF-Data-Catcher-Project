@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -312,7 +313,7 @@ const Index = () => {
 
         const dataUrl = canvas.toDataURL("image/png");
         const a = document.createElement("a");
-        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png";
+        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
         a.href = dataUrl;
         a.click();
       }
