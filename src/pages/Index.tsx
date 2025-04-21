@@ -9,12 +9,14 @@ import DestinationList from '@/components/DestinationList';
 import PageBackground from '@/components/PageBackground';
 import { Entry } from '@/types/entry';
 import { toast } from 'sonner';
-import { ChevronLeft, Table as TableIcon, FlipHorizontal } from 'lucide-react';
+import { ChevronLeft, Table as TableIcon, FlipHorizontal, Download } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveEntry, getRecentEntries } from '@/services/tableService';
 import { useQuery } from '@tanstack/react-query';
+import html2canvas from "html2canvas";
+import { getMobileImageStyles, getStatusStyleForImage } from "@/lib/image-utils";
 
 const Index = () => {
   const [pdfData, setPdfData] = useState<Omit<Entry, 'id'> | undefined>();
@@ -22,6 +24,8 @@ const Index = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [lastUpdatedId, setLastUpdatedId] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [selectedTables, setSelectedTables] = useState<string[]>([]);
+  const [isDownloadTablesLoading, setIsDownloadTablesLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -109,6 +113,146 @@ const Index = () => {
   const handleBack = () => {
     setSelectedDestination(null);
     setIsFlipped(false);
+  };
+
+  const toggleTable = (destination: string) => {
+    setSelectedTables((prev) =>
+      prev.includes(destination)
+        ? prev.filter((d) => d !== destination)
+        : [...prev, destination]
+    );
+  };
+
+  const handleDownloadSelectedTables = async () => {
+    if (!selectedTables.length) {
+      toast.error("Please select at least one table to download!");
+      return;
+    }
+    setIsDownloadTablesLoading(true);
+    try {
+      for (const dest of selectedTables) {
+        const entriesList = entriesByDestination[dest] || [];
+        const container = document.createElement("div");
+        const styles = getMobileImageStyles();
+        Object.assign(container.style, styles.containerStyle);
+
+        const heading = document.createElement("div");
+        Object.assign(heading.style, styles.headerStyle);
+
+        const title = document.createElement("h2");
+        title.textContent = dest;
+        Object.assign(title.style, styles.titleStyle);
+
+        heading.appendChild(title);
+        container.appendChild(heading);
+
+        const table = document.createElement("table");
+        Object.assign(table.style, styles.tableStyle);
+
+        const allFields =
+          entriesList.length > 0
+            ? Object.keys(entriesList[0]).filter(
+                (k) => !["id", "userId", "createdAt"].includes(k)
+              )
+            : [];
+
+        const headerRow = document.createElement("tr");
+        allFields.forEach((key) => {
+          const th = document.createElement("th");
+          th.textContent = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+          th.style.padding = "14px 8px";
+          th.style.background = "#F1F0FB";
+          th.style.fontWeight = "700";
+          th.style.fontSize = "15px";
+          th.style.color = "#6E59A5";
+          th.style.borderRadius = "10px 10px 0 0";
+          th.style.letterSpacing = "0.04em";
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        entriesList.forEach((entry) => {
+          const row = document.createElement("tr");
+          allFields.forEach((key) => {
+            const cell = document.createElement("td");
+            let value = entry[key as keyof typeof entry] ?? "-";
+            if (key === "status") {
+              const badge = document.createElement("span");
+              const statusStyle = getStatusStyleForImage(String(value));
+              badge.textContent = String(value).toUpperCase();
+              Object.assign(badge.style, {
+                ...styles.statusStyle,
+                backgroundColor: statusStyle.backgroundColor,
+                color: statusStyle.textColor,
+                minWidth: "66px",
+                height: "41px",
+                padding: "0 24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "999px",
+                fontWeight: "700",
+                fontSize: "16px",
+                letterSpacing: ".06em",
+                margin: "0 auto",
+                textAlign: "center",
+              });
+              cell.appendChild(badge);
+            } else {
+              cell.textContent = typeof value === "string" ? value : JSON.stringify(value);
+            }
+            Object.assign(cell.style, {
+              padding: "12px 8px",
+              color: "#1A1F2C",
+              fontSize: "15px",
+              background: "#fff",
+              borderBottom: "1px solid #edeaf8",
+              fontWeight: "500",
+              textAlign: "center",
+              verticalAlign: "middle",
+              maxWidth: "110px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            });
+            row.appendChild(cell);
+          });
+          table.appendChild(row);
+        });
+
+        container.appendChild(table);
+
+        container.style.position = "absolute";
+        container.style.left = "-9999px";
+        container.style.top = "0";
+        container.style.zIndex = "-1";
+        document.body.appendChild(container);
+
+        const canvas = await html2canvas(container, {
+          scale: 4,
+          width: 480,
+          height: 853,
+          backgroundColor: "#ffffff",
+          useCORS: true,
+          logging: false,
+        });
+        document.body.removeChild(container);
+
+        const dataUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.download = `table-${dest.replace(/[^a-zA-Z0-9]/g, "_")}.png";
+        a.href = dataUrl;
+        a.click();
+      }
+      toast.success("Tables downloaded as high-quality images!", {
+        position: "top-center",
+      });
+    } catch (e) {
+      console.error("Bulk table download failed:", e);
+      toast.error("Something went wrong while downloading tables.");
+    } finally {
+      setIsDownloadTablesLoading(false);
+    }
   };
 
   const entriesByDestination = (entries || []).reduce((acc, entry) => {
@@ -207,6 +351,46 @@ const Index = () => {
                   <SheetHeader className="flex items-center justify-between">
                     <SheetTitle className="text-center w-full text-xl font-semibold">Container Data Tables</SheetTitle>
                   </SheetHeader>
+                  <div className="flex flex-col gap-2 mt-4 mb-6">
+                    {Object.keys(entriesByDestination).length === 0 && (
+                      <div className="text-muted-foreground text-center p-6">
+                        No destination tables to display.
+                      </div>
+                    )}
+                    {Object.entries(entriesByDestination).map(([dest, entries]) => (
+                      <label
+                        key={dest}
+                        className={
+                          "flex items-center justify-between bg-muted/20 px-4 py-3 rounded-lg cursor-pointer border hover:bg-muted/30 transition-colors shadow-sm mb-1"
+                        }
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedTables.includes(dest)}
+                            onChange={() => toggleTable(dest)}
+                            className="accent-primary h-5 w-5 rounded border border-muted-foreground focus:ring-2 focus:ring-primary mr-2 transition-all duration-150"
+                          />
+                          <span className="font-medium text-base">{dest}</span>
+                          <span className="ml-2 bg-secondary/70 text-xs rounded-full px-2 py-0.5">{entries.length} entries</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={handleDownloadSelectedTables}
+                      disabled={isDownloadTablesLoading || selectedTables.length === 0}
+                      className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-semibold text-base"
+                      size="lg"
+                    >
+                      <Download className="w-5 h-5" />
+                      {isDownloadTablesLoading ? "Downloading..." : "Download Tables"}
+                    </Button>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      Checked tables will download as print-optimized images
+                    </span>
+                  </div>
                   <DestinationList
                     destinations={entriesByDestination}
                     onSelect={setSelectedDestination}
