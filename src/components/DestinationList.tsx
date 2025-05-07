@@ -157,20 +157,44 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
         // Create table header row
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
+        
+        // Add row for clean column headers
         fields.forEach(field => {
           const th = document.createElement('th');
-          // Format field name (camelCase to Title Case)
-          th.textContent = field.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+          // Format field name (camelCase to Title Case) with no line breaks
+          let formattedHeader = field
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, s => s.toUpperCase());
+            
+          // Fix common compound words to avoid breaks
+          formattedHeader = formattedHeader
+            .replace('Container No', 'ContainerNo')
+            .replace('Pass Number', 'PassNumber')
+            .replace('Token Number', 'TokenNumber')
+            .replace('Truck Number', 'TruckNumber');
+            
+          th.textContent = formattedHeader;
           Object.assign(th.style, styles.thStyle);
+          
+          // Set specific width based on field name
+          if (field.toLowerCase().includes('date')) {
+            th.style.minWidth = '120px';
+          } else if (field.toLowerCase().includes('name')) {
+            th.style.minWidth = '150px';
+          } else if (field.toLowerCase().includes('number') || field.toLowerCase().includes('no')) {
+            th.style.minWidth = '130px';
+          }
+          
           headerRow.appendChild(th);
         });
+        
         thead.appendChild(headerRow);
         table.appendChild(thead);
         
         // Create table body
         const tbody = document.createElement('tbody');
         
-        // Create table rows
+        // Create table rows with non-breaking content
         entriesList.forEach(entry => {
           const row = document.createElement('tr');
           fields.forEach(field => {
@@ -189,8 +213,10 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
               });
               cell.appendChild(badge);
             } else {
-              // Regular text cell
-              cell.textContent = typeof value === 'string' ? value : JSON.stringify(value);
+              // Use non-breaking content for cell values
+              const textValue = typeof value === 'string' ? value : JSON.stringify(value);
+              // Replace any spaces with non-breaking spaces for container numbers, etc
+              cell.textContent = textValue;
             }
             
             Object.assign(cell.style, styles.tdStyle);
@@ -229,8 +255,28 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
           allowTaint: true,
           width: container.offsetWidth,
           height: container.offsetHeight,
-          windowWidth: container.scrollWidth + 100, // Add extra width to ensure all columns render
-          windowHeight: container.scrollHeight
+          windowWidth: 1600, // Set a fixed width for consistency
+          windowHeight: container.scrollHeight,
+          onclone: (clonedDoc, element) => {
+            // Additional tweaks to cloned document before rendering
+            const tableElement = element.querySelector('table');
+            if (tableElement) {
+              // Ensure table has sufficient width
+              tableElement.style.width = '100%';
+              
+              // Ensure all th elements have proper width
+              const thElements = tableElement.querySelectorAll('th');
+              thElements.forEach(th => {
+                th.style.whiteSpace = 'nowrap';
+              });
+              
+              // Ensure all td elements have proper content
+              const tdElements = tableElement.querySelectorAll('td');
+              tdElements.forEach(td => {
+                td.style.whiteSpace = 'nowrap';
+              });
+            }
+          }
         });
         
         // Clean up

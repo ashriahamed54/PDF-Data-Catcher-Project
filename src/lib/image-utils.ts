@@ -116,8 +116,8 @@ export const getTableImageStyles = () => ({
   containerStyle: {
     backgroundColor: "#fff",
     padding: "40px 40px 48px 40px",
-    width: "1200px", // Increased from 1200px to ensure all columns fit
-    minHeight: "630px", // Better aspect ratio for sharing
+    width: "1500px", // Increased width to accommodate all columns properly
+    minHeight: "630px",
     margin: "0 auto",
     fontFamily: "Inter, system-ui, -apple-system, sans-serif",
     display: "flex",
@@ -148,44 +148,44 @@ export const getTableImageStyles = () => ({
     fontFamily: "Inter, system-ui, -apple-system, sans-serif"
   },
   tableStyle: {
-    width: "100%", // Ensure the table takes full width of container
-    borderCollapse: "collapse",
+    width: "100%",
+    borderCollapse: "separate",
+    borderSpacing: "0",
     backgroundColor: "#fff",
     fontWeight: 500,
     fontSize: "15px",
     color: "#000",
     boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
     borderRadius: "12px",
-    overflow: "visible", // Changed from 'hidden' to 'visible' to prevent cutoff
-    tableLayout: "auto", // Added to better handle column widths
+    overflow: "hidden",
+    tableLayout: "fixed", // Use fixed layout for more predictable column widths
   },
   thStyle: {
-    padding: "18px 20px",
+    padding: "18px 12px",
     background: "#F1F0FB",
     fontWeight: "700",
-    fontSize: "16px",
+    fontSize: "16px", 
     color: "#6E59A5",
     borderBottom: "2px solid #edeaf8",
-    letterSpacing: "0.04em",
-    textAlign: "left",
+    letterSpacing: "0.02em",
+    textAlign: "center",
     border: "1px solid #edeaf8",
     borderTopWidth: "0",
-    whiteSpace: "normal", // Allow text wrapping in headers
-    wordBreak: "break-word", // Allow breaking long words
+    whiteSpace: "nowrap", // Keep headers on one line
+    overflow: "visible",
+    minWidth: "100px", // Minimum width for columns
   },
   tdStyle: {
-    padding: "16px 20px",
+    padding: "16px 12px",
     color: "#1A1F2C",
     fontSize: "15px",
     background: "#fff",
     border: "1px solid #edeaf8",
     fontWeight: "500",
-    textAlign: "left",
+    textAlign: "center",
     verticalAlign: "middle",
-    maxWidth: "220px", 
-    wordBreak: "break-word", // Allow breaking long words
-    whiteSpace: "normal", // Changed from 'nowrap' to 'normal' to allow text wrapping
-    overflow: "visible", // Changed from 'hidden' to 'visible'
+    whiteSpace: "nowrap", // Keep cell content on one line
+    overflow: "visible",
   },
   statusBadge: {
     padding: "8px 16px",
