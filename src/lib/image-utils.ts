@@ -1,3 +1,4 @@
+
 import { formatEntryForDisplay } from "./utils";
 import { Entry } from "@/types/entry";
 
@@ -95,5 +96,88 @@ export const getMobileImageStyles = () => ({
     fontSize: '14px',
     paddingTop: '24px',
     borderTop: '1px solid #F3F4F6',
+  }
+});
+
+/**
+ * Gets professional table styles for the downloaded table image
+ */
+export const getTableImageStyles = () => ({
+  containerStyle: {
+    backgroundColor: "#fff",
+    padding: "32px 32px 36px 32px",
+    width: "1200px",
+    minHeight: "550px",
+    margin: "0 auto",
+    fontFamily: "Inter, system-ui, sans-serif",
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+    boxSizing: "border-box",
+    borderRadius: "18px",
+    boxShadow: "0 0 24px 2px #ece6f6",
+    position: "relative"
+  },
+  headerStyle: {
+    display: "flex",
+    alignItems: "center",
+    borderBottom: "2px solid #ece6f6",
+    paddingBottom: "16px",
+    marginBottom: "4px",
+    gap: "16px"
+  },
+  titleStyle: {
+    fontSize: "2rem",
+    fontWeight: "700",
+    color: "#1A1F2C",
+    margin: "0 12px 0 0",
+    letterSpacing: ".02em"
+  },
+  tableStyle: {
+    width: "100%",
+    borderCollapse: "collapse",
+    backgroundColor: "#fff",
+    fontWeight: 500,
+    fontSize: "15px",
+    color: "#000",
+  },
+  thStyle: {
+    padding: "16px 8px",
+    background: "#F1F0FB",
+    fontWeight: "700",
+    fontSize: "16px",
+    color: "#6E59A5",
+    borderRadius: "8px 8px 0 0",
+    letterSpacing: "0.04em",
+    textAlign: "center",
+    border: "1px solid #edeaf8"
+  },
+  tdStyle: {
+    padding: "14px 8px",
+    color: "#1A1F2C",
+    fontSize: "15px",
+    background: "#fff",
+    border: "1px solid #edeaf8",
+    fontWeight: "500",
+    textAlign: "center",
+    verticalAlign: "middle",
+    maxWidth: "220px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap"
+  },
+  statusBadge: {
+    padding: "0 24px",
+    borderRadius: "999px",
+    fontWeight: "700",
+    fontSize: "16px",
+    textTransform: "uppercase",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    lineHeight: "41px",
+    minWidth: "66px",
+    height: "41px",
+    margin: "0 auto"
   }
 });
