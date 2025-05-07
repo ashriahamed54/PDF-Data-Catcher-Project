@@ -20,6 +20,12 @@ export const getStatusStyleForImage = (status: string): { backgroundColor: strin
     return { backgroundColor: '#E5DEFF', textColor: '#6E59A5' };
   } else if (status === 'out') {
     return { backgroundColor: '#FFDEE2', textColor: '#B91C1C' };
+  } else if (status === 'complete' || status.includes('done') || status.includes('finish')) {
+    return { backgroundColor: '#DCFCE7', textColor: '#15803D' };
+  } else if (status.includes('pending') || status.includes('wait')) {
+    return { backgroundColor: '#FEF9C3', textColor: '#854D0E' };
+  } else if (status.includes('process') || status.includes('progress')) {
+    return { backgroundColor: '#DBEAFE', textColor: '#1E40AF' };
   }
   return { backgroundColor: '#F3F4F6', textColor: '#1F2937' };
 };
@@ -39,6 +45,9 @@ export const getMobileImageStyles = () => ({
     flexDirection: 'column',
     gap: '24px',
     boxSizing: 'border-box',
+    borderRadius: '16px',
+    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
+    overflow: 'hidden',
   },
   headerStyle: {
     display: 'flex',
@@ -53,6 +62,7 @@ export const getMobileImageStyles = () => ({
     fontWeight: '700',
     color: '#1A1F2C',
     margin: '0',
+    letterSpacing: '-0.01em',
   },
   statusStyle: {
     padding: '12px 24px',
@@ -117,22 +127,25 @@ export const getTableImageStyles = () => ({
     borderRadius: "20px",
     boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
     position: "relative",
-    overflow: "hidden"
+    overflow: "hidden",
+    background: "linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%)"
   },
   headerStyle: {
     display: "flex",
     alignItems: "center",
-    borderBottom: "2px solid #ece6f6",
+    borderBottom: "2px solid #e1dff0",
     paddingBottom: "20px",
-    marginBottom: "8px",
-    gap: "16px"
+    marginBottom: "20px",
+    gap: "16px",
+    background: "transparent"
   },
   titleStyle: {
-    fontSize: "2.2rem",
+    fontSize: "2.5rem",
     fontWeight: "700",
     color: "#1A1F2C",
     margin: "0 12px 0 0",
-    letterSpacing: ".02em"
+    letterSpacing: ".005em",
+    fontFamily: "Inter, system-ui, -apple-system, sans-serif"
   },
   tableStyle: {
     width: "100%",
@@ -141,10 +154,12 @@ export const getTableImageStyles = () => ({
     fontWeight: 500,
     fontSize: "15px",
     color: "#000",
-    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)"
+    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+    borderRadius: "12px",
+    overflow: "hidden"
   },
   thStyle: {
-    padding: "18px 16px",
+    padding: "18px 20px",
     background: "#F1F0FB",
     fontWeight: "700",
     fontSize: "16px",
@@ -156,7 +171,7 @@ export const getTableImageStyles = () => ({
     borderTopWidth: "0"
   },
   tdStyle: {
-    padding: "16px",
+    padding: "16px 20px",
     color: "#1A1F2C",
     fontSize: "15px",
     background: "#fff",
@@ -182,6 +197,7 @@ export const getTableImageStyles = () => ({
     minWidth: "66px",
     height: "36px",
     margin: "0",
-    letterSpacing: "0.05em"
+    letterSpacing: "0.05em",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)"
   }
 });

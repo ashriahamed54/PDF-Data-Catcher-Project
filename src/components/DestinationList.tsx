@@ -256,7 +256,7 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
               size="sm"
               onClick={handleDownloadTables}
               disabled={selectedTables.length === 0 || isDownloading}
-              className="flex items-center gap-2 px-4 h-10 rounded-full"
+              className="flex items-center gap-2 px-5 h-10 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
             >
               <Download className="w-4 h-4" />
               {isDownloading ? 'Downloading...' : 'Download'}
@@ -265,7 +265,7 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
               variant="ghost"
               size="sm"
               onClick={resetSelection}
-              className="flex items-center justify-center h-10 w-10 rounded-full p-0"
+              className="flex items-center justify-center h-10 w-10 rounded-full p-0 hover:bg-muted/50"
               aria-label="Cancel Selection"
             >
               <CloseIcon className="h-5 w-5" />
@@ -286,7 +286,7 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
             variant="ghost"
             size="icon"
             onClick={handleRefresh}
-            className="flex items-center justify-center h-9 w-9"
+            className="flex items-center justify-center h-9 w-9 rounded-md"
             disabled={isRefreshing}
             title="Refresh Data"
           >
@@ -302,7 +302,7 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
             className={`
               relative w-full flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 active:bg-muted/40
               ${selectionMode && selectedTables.includes(destination) 
-                ? 'bg-primary/10 border-primary shadow-sm' 
+                ? 'bg-primary/10 border-primary shadow-md' 
                 : 'hover:bg-muted/30 bg-muted/10 border-border/50'}
             `}
             onClick={() => handleDestinationClick(destination)}
@@ -310,21 +310,21 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
             onTouchStart={() => handleTouchStart(destination)}
             onTouchEnd={handleTouchEnd}
           >
-            <span className="flex items-center gap-2 cursor-pointer">
+            <span className="flex items-center gap-2 cursor-pointer flex-1">
               <Database 
-                className={`w-5 h-5 ${
+                className={`w-6 h-6 ${
                   selectionMode && selectedTables.includes(destination) 
                     ? 'text-primary' 
                     : 'text-muted-foreground'
                 }`}
               />
-              <span className="truncate font-medium">{destination || 'Unnamed Destination'}</span>
+              <span className="truncate font-medium text-base">{destination || 'Unnamed Destination'}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">({destinations[destination].length} entries)</span>
             </span>
             
             {/* Selection indicator */}
             {selectionMode && selectedTables.includes(destination) && (
-              <div className="absolute right-4 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground">
+              <div className="absolute right-4 flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground shadow-sm">
                 <Check className="w-4 h-4" />
               </div>
             )}
