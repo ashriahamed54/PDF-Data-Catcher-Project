@@ -105,29 +105,30 @@ export const getMobileImageStyles = () => ({
 export const getTableImageStyles = () => ({
   containerStyle: {
     backgroundColor: "#fff",
-    padding: "32px 32px 36px 32px",
+    padding: "40px 40px 48px 40px",
     width: "1200px",
-    minHeight: "550px",
+    minHeight: "630px", // Better aspect ratio for sharing
     margin: "0 auto",
-    fontFamily: "Inter, system-ui, sans-serif",
+    fontFamily: "Inter, system-ui, -apple-system, sans-serif",
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "24px",
     boxSizing: "border-box",
-    borderRadius: "18px",
-    boxShadow: "0 0 24px 2px #ece6f6",
-    position: "relative"
+    borderRadius: "20px",
+    boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
+    position: "relative",
+    overflow: "hidden"
   },
   headerStyle: {
     display: "flex",
     alignItems: "center",
     borderBottom: "2px solid #ece6f6",
-    paddingBottom: "16px",
-    marginBottom: "4px",
+    paddingBottom: "20px",
+    marginBottom: "8px",
     gap: "16px"
   },
   titleStyle: {
-    fontSize: "2rem",
+    fontSize: "2.2rem",
     fontWeight: "700",
     color: "#1A1F2C",
     margin: "0 12px 0 0",
@@ -140,26 +141,28 @@ export const getTableImageStyles = () => ({
     fontWeight: 500,
     fontSize: "15px",
     color: "#000",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)"
   },
   thStyle: {
-    padding: "16px 8px",
+    padding: "18px 16px",
     background: "#F1F0FB",
     fontWeight: "700",
     fontSize: "16px",
     color: "#6E59A5",
-    borderRadius: "8px 8px 0 0",
+    borderBottom: "2px solid #edeaf8",
     letterSpacing: "0.04em",
-    textAlign: "center",
-    border: "1px solid #edeaf8"
+    textAlign: "left",
+    border: "1px solid #edeaf8",
+    borderTopWidth: "0"
   },
   tdStyle: {
-    padding: "14px 8px",
+    padding: "16px",
     color: "#1A1F2C",
     fontSize: "15px",
     background: "#fff",
     border: "1px solid #edeaf8",
     fontWeight: "500",
-    textAlign: "center",
+    textAlign: "left",
     verticalAlign: "middle",
     maxWidth: "220px",
     overflow: "hidden",
@@ -167,17 +170,18 @@ export const getTableImageStyles = () => ({
     whiteSpace: "nowrap"
   },
   statusBadge: {
-    padding: "0 24px",
+    padding: "8px 16px",
     borderRadius: "999px",
     fontWeight: "700",
-    fontSize: "16px",
+    fontSize: "14px",
     textTransform: "uppercase",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    lineHeight: "41px",
+    lineHeight: "20px",
     minWidth: "66px",
-    height: "41px",
-    margin: "0 auto"
+    height: "36px",
+    margin: "0",
+    letterSpacing: "0.05em"
   }
 });

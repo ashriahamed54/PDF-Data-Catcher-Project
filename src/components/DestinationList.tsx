@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Database, ChevronLeft, RefreshCcw, Download } from 'lucide-react';
+import { Database, ChevronLeft, RefreshCcw, Download, X as CloseIcon, Check } from 'lucide-react';
 import { Entry } from '@/types/entry';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -244,63 +244,66 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
   
   return (
     <div className="grid gap-4 mt-4">
-      <div className="flex justify-between items-center mb-2">
-        <div className="text-sm text-muted-foreground">
-          {selectionMode ? (
-            <span>
-              {selectedTables.length} table(s) selected
-            </span>
-          ) : (
+      {selectionMode && (
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-3 px-1 -mt-4 -mx-4 mb-2 flex items-center justify-between border-b shadow-sm">
+          <div className="text-sm font-medium ml-3">
+            {selectedTables.length} table{selectedTables.length !== 1 ? 's' : ''} selected
+          </div>
+          
+          <div className="flex gap-3 items-center">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleDownloadTables}
+              disabled={selectedTables.length === 0 || isDownloading}
+              className="flex items-center gap-2 px-4 h-10 rounded-full"
+            >
+              <Download className="w-4 h-4" />
+              {isDownloading ? 'Downloading...' : 'Download'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetSelection}
+              className="flex items-center justify-center h-10 w-10 rounded-full p-0"
+              aria-label="Cancel Selection"
+            >
+              <CloseIcon className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {!selectionMode && (
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-xs text-muted-foreground">
             <span>
               Long-press or right-click to select tables
             </span>
-          )}
-        </div>
-        
-        <div className="flex gap-2">
-          {selectionMode && (
-            <>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleDownloadTables}
-                disabled={selectedTables.length === 0 || isDownloading}
-                className="flex items-center gap-1"
-              >
-                <Download className="w-4 h-4" />
-                {isDownloading ? 'Downloading...' : 'Download'}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetSelection}
-              >
-                Cancel
-              </Button>
-            </>
-          )}
+          </div>
+          
           <Button
             variant="ghost"
             size="icon"
             onClick={handleRefresh}
-            className="flex items-center justify-center"
+            className="flex items-center justify-center h-9 w-9"
             disabled={isRefreshing}
             title="Refresh Data"
           >
             <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
-      </div>
+      )}
       
       {destinationKeys.length > 0 ? (
         destinationKeys.map((destination) => (
           <div
             key={destination}
             className={`
-              w-full flex items-center gap-3 p-4 rounded-lg border hover:bg-muted/30 transition-colors
+              relative w-full flex items-center gap-3 p-4 rounded-lg border transition-all duration-200 active:bg-muted/40
               ${selectionMode && selectedTables.includes(destination) 
-                ? 'bg-primary/10 border-primary/30' 
-                : 'bg-muted/20 border-border/50'}
+                ? 'bg-primary/10 border-primary shadow-sm' 
+                : 'hover:bg-muted/30 bg-muted/10 border-border/50'}
             `}
             onClick={() => handleDestinationClick(destination)}
             onContextMenu={(e) => handleContextMenu(e, destination)}
@@ -308,11 +311,28 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
             onTouchEnd={handleTouchEnd}
           >
             <span className="flex items-center gap-2 cursor-pointer">
-              <Database className={`w-5 h-5 ${selectionMode && selectedTables.includes(destination) ? 'text-primary' : 'text-muted-foreground'}`} />
-              <span className="truncate">{destination || 'Unnamed Destination'}</span>
+              <Database 
+                className={`w-5 h-5 ${
+                  selectionMode && selectedTables.includes(destination) 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground'
+                }`}
+              />
+              <span className="truncate font-medium">{destination || 'Unnamed Destination'}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">({destinations[destination].length} entries)</span>
             </span>
-            <ChevronLeft className="w-4 h-4 rotate-180 flex-shrink-0 ml-auto" />
+            
+            {/* Selection indicator */}
+            {selectionMode && selectedTables.includes(destination) && (
+              <div className="absolute right-4 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground">
+                <Check className="w-4 h-4" />
+              </div>
+            )}
+            
+            {/* Navigate arrow (only show when not in selection mode) */}
+            {!selectionMode && (
+              <ChevronLeft className="w-5 h-5 rotate-180 flex-shrink-0 ml-auto text-muted-foreground/70" />
+            )}
           </div>
         ))
       ) : (
