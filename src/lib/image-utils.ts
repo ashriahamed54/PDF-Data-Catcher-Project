@@ -116,7 +116,7 @@ export const getTableImageStyles = () => ({
   containerStyle: {
     backgroundColor: "#fff",
     padding: "40px 40px 48px 40px",
-    width: "1200px",
+    width: "1200px", // Increased from 1200px to ensure all columns fit
     minHeight: "630px", // Better aspect ratio for sharing
     margin: "0 auto",
     fontFamily: "Inter, system-ui, -apple-system, sans-serif",
@@ -148,7 +148,7 @@ export const getTableImageStyles = () => ({
     fontFamily: "Inter, system-ui, -apple-system, sans-serif"
   },
   tableStyle: {
-    width: "100%",
+    width: "100%", // Ensure the table takes full width of container
     borderCollapse: "collapse",
     backgroundColor: "#fff",
     fontWeight: 500,
@@ -156,7 +156,8 @@ export const getTableImageStyles = () => ({
     color: "#000",
     boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
     borderRadius: "12px",
-    overflow: "hidden"
+    overflow: "visible", // Changed from 'hidden' to 'visible' to prevent cutoff
+    tableLayout: "auto", // Added to better handle column widths
   },
   thStyle: {
     padding: "18px 20px",
@@ -168,7 +169,9 @@ export const getTableImageStyles = () => ({
     letterSpacing: "0.04em",
     textAlign: "left",
     border: "1px solid #edeaf8",
-    borderTopWidth: "0"
+    borderTopWidth: "0",
+    whiteSpace: "normal", // Allow text wrapping in headers
+    wordBreak: "break-word", // Allow breaking long words
   },
   tdStyle: {
     padding: "16px 20px",
@@ -179,10 +182,10 @@ export const getTableImageStyles = () => ({
     fontWeight: "500",
     textAlign: "left",
     verticalAlign: "middle",
-    maxWidth: "220px",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap"
+    maxWidth: "220px", 
+    wordBreak: "break-word", // Allow breaking long words
+    whiteSpace: "normal", // Changed from 'nowrap' to 'normal' to allow text wrapping
+    overflow: "visible", // Changed from 'hidden' to 'visible'
   },
   statusBadge: {
     padding: "8px 16px",

@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Database, ChevronLeft, RefreshCcw, Download, X as CloseIcon, Check } from 'lucide-react';
 import { Entry } from '@/types/entry';
@@ -156,6 +155,7 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
           : [];
         
         // Create table header row
+        const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
         fields.forEach(field => {
           const th = document.createElement('th');
@@ -164,7 +164,11 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
           Object.assign(th.style, styles.thStyle);
           headerRow.appendChild(th);
         });
-        table.appendChild(headerRow);
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        // Create table body
+        const tbody = document.createElement('tbody');
         
         // Create table rows
         entriesList.forEach(entry => {
@@ -192,8 +196,10 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
             Object.assign(cell.style, styles.tdStyle);
             row.appendChild(cell);
           });
-          table.appendChild(row);
+          tbody.appendChild(row);
         });
+        
+        table.appendChild(tbody);
         
         // Add table to container
         container.appendChild(table);
@@ -211,24 +217,36 @@ const DestinationList = ({ destinations, onSelect }: DestinationListProps) => {
         document.body.appendChild(container);
         container.style.position = 'absolute';
         container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.zIndex = '-1';
         
-        // Generate image
+        // Generate image with better quality options
         const canvas = await html2canvas(container, {
-          scale: 2,
+          scale: 2, // Higher scale for better resolution
           backgroundColor: '#ffffff',
           logging: false,
-          useCORS: true
+          useCORS: true,
+          allowTaint: true,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+          windowWidth: container.scrollWidth + 100, // Add extra width to ensure all columns render
+          windowHeight: container.scrollHeight
         });
         
         // Clean up
         document.body.removeChild(container);
         
         // Download image
-        const dataUrl = canvas.toDataURL('image/png');
+        const dataUrl = canvas.toDataURL('image/png', 1.0); // Use maximum quality
         const a = document.createElement('a');
         a.download = `table-${destination.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
         a.href = dataUrl;
         a.click();
+        
+        // Small delay between downloads if multiple tables
+        if (selectedTables.length > 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
       
       toast.success('Tables downloaded successfully!');
